@@ -55,6 +55,8 @@ header {
 }
 
 main {
+  display: flex;
+  flex-direction: column;
   padding: 0.75rem 1.6rem;
 }
 #movies {
@@ -169,6 +171,15 @@ h3.overv {
   text-align: center;
   color: rgb(216, 216, 216);
   margin: 0.3rem 0;
+}
+.next-page-btn {
+  background-color: rgb(83, 83, 184);
+  color: white;
+  border: 2px solid rgb(30, 30, 71);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  margin: 3rem auto;
+  cursor: pointer;
 }
 @keyframes fadeIn {
   from {

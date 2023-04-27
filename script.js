@@ -2,40 +2,41 @@ const APIURL = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.d
 const IMGPATH = "https://image.tmdb.org/t/p/w1280";
 const SEARCHAPI = "https://api.themoviedb.org/3/search/movie?&api_key=04c35731a5ee918f014970082a0088b1&query=";
 
-const movieApp = document.getElementById('movies');
-const movies = document.querySelectorAll('.movie');
-const searchBar = document.getElementById('search-bar');
-const titleLabel = document.querySelector('.content-label');
+const main = document.querySelector('main');
+const movieApp = document.getElementById('movies'); //div - the container for movies
+const movies = document.querySelectorAll('.movie'); //div - the container for each movie
+const searchBar = document.getElementById('search-bar'); //input type text for search
+const titleLabel = document.querySelector('.content-label'); // h2 - label for app content
 
-let page = 1;
-loadMovies();
+let page = 1; //intiialize page to 1 to be use in changing to later
+loadMovies(); //load some random movies at first load
 
 titleLabel.addEventListener('click', ()=>{
   location.reload();
   reloadWeb();
 });
 
-
 const debounceSearch = debounce(searchMovies, 1200);
 
 searchBar.addEventListener('input', async ()=> {
-  const results = await debounceSearch(searchBar.value);
+  searchResults = await debounceSearch(searchBar.value);
   scrollToTop();
-  if (results !== undefined) {
-    displaySearchMovies(await results);
+  if (searchResults !== undefined) {
+    displaySearchMovies(await searchResults);
+    searchPage++;
   } else {
-    console.log(`undefine: ${results}`);
+    console.log(`undefine: ${searchResults}`);
   }
 })
 
-
-
+//Request random movie from API and return object.
 async function randomMovies(page) {
   const resp = await fetch(APIURL + page);
   const respData = await resp.json();
   return respData;
 }
 
+//Return an object
 async function searchMovies(title) {
   const resp = await fetch(SEARCHAPI + title);
   const respData = await resp.json();
@@ -50,16 +51,19 @@ async function displaySearchMovies(results) {
  
   const totalPage = await results.total_pages;
   const totalResults = await results.total_results;
-  const moviesFound = await results.results; //Array
+  let moviesFound = await results.results; //Array
 
+  //if the search do not found a movie
   if (totalResults === 0) {
-    movieApp.innerHTML = '';
+    movieApp.innerHTML = ''; //remove previous content
     movieApp.innerHTML = `
       <div class="found-label">Movie Found: ${totalResults}</div>
     `;
-    loadMovies();
+    loadMovies(); // since there is no found movie, it will just display random
     return;
   }
+
+  //if the search found movie/s
   if (moviesFound !== undefined) {
     movieApp.innerHTML = `
       <div class="found-label">Movie Found: ${totalResults}</div>
@@ -67,12 +71,12 @@ async function displaySearchMovies(results) {
     moviesFound.forEach((movie)=> {
       addMovieHTML(movie);
     })
-    results.page++;
-    document.body.addEventListener('scroll', checkIfReachedBottom(async ()=>{
-      console.log("reached");
-     
-      displaySearchMovies(results);
-    }));
+
+    if (totalPage === results.page) {
+      return;
+    }
+
+    moviesFound = results.results; 
   }
 }
 
@@ -124,10 +128,10 @@ function addMovieHTML(movie) {
     };
   }
 
-
+// Request random movies from API
 async function loadMovies() {
   const requestData = await randomMovies(page);
-  const results = await requestData.results;
+  const results = await requestData.results; //get the movie results. return array(20) size
   
   if (requestData !== undefined && results !== undefined) {
     results.forEach((result)=>{
@@ -139,7 +143,6 @@ async function loadMovies() {
     console.log("Fetching Data from API")
   }
 
-  console.log(page);
 }
 
 
